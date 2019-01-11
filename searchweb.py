@@ -7,6 +7,7 @@ Created on Thu Jan 10 19:30:47 2019
 
 try :
     from googlesearch import search
+    import pandas as pd
     #import tldextract
 except ImportError:
     print ("No module named google found")
@@ -58,3 +59,17 @@ for i in range(len(queries)):
 print("\n\n\n\n The Website which contains the queries as domain name.")
 for i in range(len(websitelistfinal)):
     print (websitelistfinal[i])
+websitelistfinal = list(set(websitelistfinal))
+df = pd.DataFrame(websitelistfinal)
+df.columns = ['Website Address']
+df.to_excel("D:\\output_website.xls",index =False)
+with open('website_data.txt','w') as f:
+    f.write("Queries \n\n")
+    for item in queries:
+        f.write("%s\n" %item)   
+    f.write("\n \n \nWebsite_final_list \n\n")
+    for item in websitelistfinal:
+        f.write("%s\n" %item)
+    f.write("\n \n \nValues_Websites \n\n")
+    for item in values_websites:
+        f.write("%s\n" %item)   
