@@ -37,7 +37,7 @@ while a != 'exit':
         print (str(i) + "-->" + result)
         i=i+1
         values_websites.append(result)
-    a = str(input('Exit / For staing press enter.'))        
+    a = str(input('Exit / For staing press enter.')).lower()    
 
 new_data =[]
 a = len(values_websites)
