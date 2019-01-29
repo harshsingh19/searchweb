@@ -247,6 +247,6 @@ if __name__ == "__main__":
         returned_list3 = finding_string(returned_list2,queries)
         returned_list4 = second_data(returned_list,queries)
         returned_list5 = list(set(cleaing_data(returned_list4)))
-        lst = sending_url(returned_list3)
+        lst = sending_url(returned_list5)
         lst = [x for x in lst if x is not None]
         output_saving(returned_list3,returned_list)
