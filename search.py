@@ -11,14 +11,18 @@ try :
     import os
     import time
     from word_cloud_ import main as wc
+    import urllib
+    import re
     #import tldextract
 except ImportError:
     print ("Library not found")
 
+values_websites = []
 
 def Downloading_data():
     a = 0
     queries = []
+    values_web = []
     while a != 'exit':
         query = str(input("Enter the query to be searched \n"))
         if len(query) is 0:
@@ -26,8 +30,16 @@ def Downloading_data():
         else:
             values_websites = validinputs(query)
         queries.append(query)
-        a = str(input('\nExit / For staying press enter.')).lower()      
-    return values_websites,queries
+        if type(values_websites) == str:
+            values_web.append(values_websites)
+            break
+        else:
+            values_web.append(values_websites)
+
+        a = str(input('\nExit / For staying press enter.')).lower() 
+        if values_web == None:
+            print("Exit without output")
+    return values_web[0],queries
 
 def validinputs(query):
     domain = str(input("Enter the Domain to be searched \n1.USA\n2.UK\n3.Canada\n4.Austraila\n If search all domain leave null\n")).lower()
@@ -57,7 +69,7 @@ def stringcheck(query,domain):
     dict_domain = {1:"com",'usa':"com",2:"co.uk",'uk':"co.uk",3:"ca",'canada':"ca",4:"com.au",'austraila':"com.au"}
     list_domain =["co.uk","com","ca","com.au"]
     i = 1
-    values_websites = []
+    global values_websites
     if domain != 0:
         if isIntorString(domain):
             domain = int(domain)
@@ -73,35 +85,70 @@ def stringcheck(query,domain):
                 print( "\nEnter a valid Input")
                 validinputs(query)
     else:
-        for j in range( len(list_domain)):  
-            for result in search(query,tld = list_domain[j],num =100,stop=1,pause =2):
-                print (str(i) + "-->" + result)
-                i=i+1
-                values_websites.append(result)
-        return values_websites
+        try:
+            for j in range( len(list_domain)):  
+                for result in search(query,tld = list_domain[j],num =100,stop=1,pause =2):
+                    print (str(i) + "-->" + result)
+                    i=i+1
+                    values_websites.append(result)
 
+            return values_websites
+        except urllib.error.HTTPError as e:
+            print("Service Unavailable")
+            print(e)
+            return "Service Unavailable"
+            
 def query_return(domain,query):
-    #try :
-    values_websites = []
-    i = 1
-    for result in search(query,tld = domain,num =100,stop=1,pause =2):
-                print (str(i) + "-->" + result)
-                i=i+1
-                values_websites.append(result)
-    return values_websites
-#except AttributeError:
-#        print("Value found Null")
+    try :
+        global values_websites
+        i = 1
+        for result in search(query,tld = domain,num =100,stop=1,pause =2):
+                    print (str(i) + "-->" + result)
+                    i=i+1                    
+                    if len(values_websites)==0:
+                        values_websites.append(result)
+                    else:
+                        values_websites.append(result)
+
+        
+        return values_websites
+    except urllib.error.HTTPError as e:
+        print("Service Unavailable")
+        print(e)
+        return "Service Unavailable"
+
+def second_data(values_websites,queries):
+    second_final_list = []
+    for link in values_websites:
+    
+        review = link.lower()
+        review = review.split("://")
+        review = re.split(r"[^a-zA-Z0-9\s]",review[1])
+        review = list(set(review))
+        x = 0
+        for i in review:
+            for word in queries:
+                if x <6: 
+                    if i == word:
+                        second_final_list.append(link)
+            x = x+1
+    return second_final_list
+        
+
+
 def cleaing_data(values_websites):
     new_data =[]
     a = len(values_websites)
-    for j in range(0, a):
-        review = values_websites[j]
-        review = review.lower()
-        spltAr = review.split("://")
-        i = (0,1)[len(spltAr)>1]
-        review =spltAr[i].split("?")[0].split('/')[0].lower()
-        new_data.append(review)
-    new_data = list(set(new_data))
+    if a>0:
+        for j in range(0, a):
+            if returned_list[j] != None:
+                review = values_websites[j]
+                review = review.lower()
+                review = review.split("://")
+                i = (0,1)[len(review)>1]
+                review = review[i].split("?")[0].split('/')[0].lower()
+                new_data.append(review)
+    
     return new_data
 
 def finding_string(new_data,queries):
@@ -136,66 +183,70 @@ def output_saving(websitelistfinal,values_websites):
         else:
             df.to_excel("xls_file_data/output_website.xls",index =False)
         
-    with open('website_data/website_data.txt','w') as f:
-        if os.path.exists("website_data"):
-            if os.path.exists("website_data/website_data.txt"):
-                with open('website_data/website_data{}.txt'.format(int(time.time())),'w') as f:                    
-                    f.write("Queries \n\n")
-                    for item in queries:
-                        f.write("%s\n" %item)   
-                    f.write("\n \n \nWebsite_final_list \n\n")
-                    for item in websitelistfinal:
-                        f.write("%s\n" %item)
-                    f.write("\n \n \nValues_Websites \n\n")
-                    for item in values_websites:
-                        f.write("%s\n" %item)   
-            else:
-                with open('website_data/website_data.txt','w') as f:
-                    
-                    f.write("Queries \n\n")
-                    for item in queries:
-                        f.write("%s\n" %item)   
-                    f.write("\n \n \nWebsite_final_list \n\n")
-                    for item in websitelistfinal:
-                        f.write("%s\n" %item)
-                    f.write("\n \n \nValues_Websites \n\n")
-                    for item in values_websites:
-                        f.write("%s\n" %item)   
+    if os.path.exists("website_data"):
+        if os.path.exists("website_data/website_data.txt"):
+            with open('website_data/website_data{}.txt'.format(int(time.time())),'w') as f:                    
+                f.write("Queries \n\n")
+                for item in queries:
+                    f.write("%s\n" %item)   
+                f.write("\n \n \nWebsite_final_list \n\n")
+                for item in websitelistfinal:
+                    f.write("%s\n" %item)
+                f.write("\n \n \nValues_Websites \n\n")
+                for item in values_websites:
+                    f.write("%s\n" %item)   
         else:
-            os.mkdir("website_data")
-            if os.path.exists("website_data/website_data.txt"):
-                with open('website_data/website_data{}.txt'.format(int(time.time())),'w') as f:
-                    
-                    f.write("Queries \n\n")
-                    for item in queries:
-                        f.write("%s\n" %item)   
-                    f.write("\n \n \nWebsite_final_list \n\n")
-                    for item in websitelistfinal:
-                        f.write("%s\n" %item)
-                    f.write("\n \n \nValues_Websites \n\n")
-                    for item in values_websites:
-                        f.write("%s\n" %item)   
-            else:
-                with open('website_data/website_data.txt','w') as f:
-                    
-                    f.write("Queries \n\n")
-                    for item in queries:
-                        f.write("%s\n" %item)   
-                    f.write("\n \n \nWebsite_final_list \n\n")
-                    for item in websitelistfinal:
-                        f.write("%s\n" %item)
-                    f.write("\n \n \nValues_Websites \n\n")
-                    for item in values_websites:
-                        f.write("%s\n" %item)   
+            with open('website_data/website_data.txt','w') as f:
+                f.write("Queries \n\n")
+                for item in queries:
+                    f.write("%s\n" %item)   
+                f.write("\n \n \nWebsite_final_list \n\n")
+                for item in websitelistfinal:
+                    f.write("%s\n" %item)
+                f.write("\n \n \nValues_Websites \n\n")
+                for item in values_websites:
+                    f.write("%s\n" %item)   
+    else:
+        os.mkdir("website_data")
+        if os.path.exists("website_data/website_data.txt"):
+            with open('website_data/website_data{}.txt'.format(int(time.time())),'w') as f:
+                
+                f.write("Queries \n\n")
+                for item in queries:
+                    f.write("%s\n" %item)   
+                f.write("\n \n \nWebsite_final_list \n\n")
+                for item in websitelistfinal:
+                    f.write("%s\n" %item)
+                f.write("\n \n \nValues_Websites \n\n")
+                for item in values_websites:
+                    f.write("%s\n" %item)   
+        else:
+            with open('website_data/website_data.txt','w') as f:
+                
+                f.write("Queries \n\n")
+                for item in queries:
+                    f.write("%s\n" %item)   
+                f.write("\n \n \nWebsite_final_list \n\n")
+                for item in websitelistfinal:
+                    f.write("%s\n" %item)
+                f.write("\n \n \nValues_Websites \n\n")
+                for item in values_websites:
+                    f.write("%s\n" %item)   
 def sending_url(websitelistfinal):
     lst = []
     for i in websitelistfinal:
         lst.append(wc(i))
     return lst
 if __name__ == "__main__":
-    
     returned_list,queries = Downloading_data()
-    returned_list2 = cleaing_data(returned_list) 
-    returned_list3 = finding_string(returned_list2,queries)
-    lst = sending_url(returned_list3)
-    output_saving(returned_list3,returned_list)
+    
+    if "Service Unavailable" in returned_list:
+        print("No values found")
+    else:   
+        returned_list2 = cleaing_data(returned_list)
+        returned_list3 = finding_string(returned_list2,queries)
+        returned_list4 = second_data(returned_list,queries)
+        returned_list5 = list(set(cleaing_data(returned_list4)))
+        lst = sending_url(returned_list3)
+        lst = [x for x in lst if x is not None]
+        output_saving(returned_list3,returned_list)
