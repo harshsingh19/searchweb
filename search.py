@@ -13,15 +13,16 @@ try :
     from word_cloud_ import main as wc
     import urllib
     import re
+    from urllib.parse import urlparse
     #import tldextract
 except ImportError:
     print ("Library not found")
 
 values_websites = []
-
+queries = []
 def Downloading_data():
     a = 0
-    queries = []
+    global queries
     values_web = []
     while a != 'exit':
         query = str(input("Enter the query to be searched \n"))
@@ -29,7 +30,10 @@ def Downloading_data():
             print ( "Please enter the query to search\n")
         else:
             values_websites = validinputs(query)
-        queries.append(query)
+            search_query = query.split("\"")
+            search_query = [x for x in search_query if x is not None]
+            for j in search_query:    
+                queries.append(j)
         if type(values_websites) == str:
             values_web.append(values_websites)
             break
@@ -120,7 +124,6 @@ def query_return(domain,query):
 def second_data(values_websites,queries):
     second_final_list = []
     for link in values_websites:
-    
         review = link.lower()
         review = review.split("://")
         review = re.split(r"[^a-zA-Z0-9\s]",review[1])
@@ -128,7 +131,7 @@ def second_data(values_websites,queries):
         x = 0
         for i in review:
             for word in queries:
-                if x <6: 
+                if x <4: 
                     if i == word:
                         second_final_list.append(link)
             x = x+1
@@ -142,13 +145,9 @@ def cleaing_data(values_websites):
     if a>0:
         for j in range(0, a):
             if returned_list[j] != None:
-                review = values_websites[j]
-                review = review.lower()
-                review = review.split("://")
-                i = (0,1)[len(review)>1]
-                review = review[i].split("?")[0].split('/')[0].lower()
+                url = values_websites[j]
+                review = urlparse(url).hostname
                 new_data.append(review)
-    
     return new_data
 
 def finding_string(new_data,queries):
