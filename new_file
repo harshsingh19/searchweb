@@ -1,13 +1,7 @@
-# -*- coding: utf-8 -*-
-"""
-Created on Mon Feb  4 01:03:10 2019
-
-@author: harsh
-"""
-import urllib.request
+import urllib2
 from bs4 import BeautifulSoup
 import re
-site = urllib.request.urlopen('https://duckduckgo.com/?q=hi')
+site = urllib2.urlopen('https://duckduckgo.com/html/?q=hi')
 data = site.read()
 parsed = BeautifulSoup(data)
 count = 0
