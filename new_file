@@ -1,0 +1,16 @@
+# -*- coding: utf-8 -*-
+"""
+Created on Mon Feb  4 01:03:10 2019
+
+@author: harsh
+"""
+import urllib.request
+from bs4 import BeautifulSoup
+import re
+site = urllib.request.urlopen('https://duckduckgo.com/?q=hi')
+data = site.read()
+parsed = BeautifulSoup(data)
+count = 0
+for i in parsed.findAll('div', {'class': re.compile('links_main*')}):
+    print (i.a['href'])
+    count = count +1
