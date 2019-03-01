@@ -4,7 +4,7 @@ Created on Thu Jan 10 19:30:47 2019
 
 @author: harsh
 """
-
+#!/usr/bin/evn python
 try :
     from googlesearch import search
     import pandas as pd
@@ -137,7 +137,17 @@ def second_data(values_websites,queries):
             x = x+1
     return second_final_list
         
-
+def removing_listed_webpage(returned_list4):
+    val = []
+    with open('xyzq.txt','r') as f:
+        words = f.read().split("\n")
+    for i in returned_list4:
+        for j in words:
+            url = urlparse(i).hostname
+            if (j in url) is False:
+                val.append(i)
+    val = list(set(val))
+    return val
 
 def cleaing_data(values_websites):
     new_data =[]
@@ -236,6 +246,7 @@ def sending_url(websitelistfinal):
     for i in websitelistfinal:
         lst.append(wc(i))
     return lst
+
 if __name__ == "__main__":
     returned_list,queries = Downloading_data()
     
@@ -245,7 +256,8 @@ if __name__ == "__main__":
         returned_list2 = cleaing_data(returned_list)
         returned_list3 = finding_string(returned_list2,queries)
         returned_list4 = second_data(returned_list,queries)
-        returned_list5 = list(set(cleaing_data(returned_list4)))
+        returned_list5 = removing_listed_webpage(returned_list4)
+        returned_list6 = list(set(cleaing_data(returned_list5)))
         lst = sending_url(returned_list5)
         lst = [x for x in lst if x is not None]
         output_saving(returned_list3,returned_list)
